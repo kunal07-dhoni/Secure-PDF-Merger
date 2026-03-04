@@ -1,0 +1,44 @@
+
+---
+
+## Database Schema
+
+```sql
+-- Users table
+CREATE TABLE users (
+    id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    merge_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_username ON users(username);
+
+-- Merge History table
+CREATE TABLE merge_histories (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    output_filename VARCHAR(255) NOT NULL,
+    original_filenames TEXT NOT NULL,
+    file_count INTEGER NOT NULL,
+    total_pages INTEGER DEFAULT 0,
+    output_size_bytes BIGINT DEFAULT 0,
+    page_ranges TEXT,
+    watermark_applied VARCHAR(255),
+    compressed INTEGER DEFAULT 0,
+    download_token VARCHAR(255) UNIQUE,
+    download_expires_at TIMESTAMP,
+    download_count INTEGER DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'completed',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_history_user ON merge_histories(user_id);
